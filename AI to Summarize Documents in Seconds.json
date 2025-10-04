@@ -1,0 +1,235 @@
+{
+  "name": "AI to Summarize Documents in Seconds",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "10OYmnu23ZwMrOsN4KSx80gYj5hvZvRSC",
+          "mode": "list",
+          "cachedResultName": "summarize documents",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/10OYmnu23ZwMrOsN4KSx80gYj5hvZvRSC"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7d285ce8-eb93-48f8-94e9-346990cec98e",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "roYYynoqxh0ZHtzk",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "80a0a86c-ed7d-4ea6-8f6a-6728eae2080f",
+      "name": "Get a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "oR7FSuuNESMLYdMh",
+          "name": "Google Docs account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-preview-05-20",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-preview-05-20"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Summaryze this content into 3-7 sentences: {{ $json.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "d2652170-7e82-41c6-be99-623d19177980",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bxPoLrFGHBjm1Hyi",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        512,
+        208
+      ],
+      "id": "c93d3368-1edc-4f57-b09a-adf223e20059",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1IPDa9B-TExvDdwYLagjyskiBfBU3bI0C4cpcwOLCJPI",
+          "mode": "list",
+          "cachedResultName": "Demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IPDa9B-TExvDdwYLagjyskiBfBU3bI0C4cpcwOLCJPI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IPDa9B-TExvDdwYLagjyskiBfBU3bI0C4cpcwOLCJPI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Google Drive Trigger').item.json.name }}",
+            "Summary ": "={{ $json.content.parts[0].text }}",
+            "URL": "={{ $('Google Drive Trigger').item.json.webViewLink }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary ",
+              "displayName": "Summary ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        0
+      ],
+      "id": "8918ca9d-a598-41af-be85-690a8d693b43",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "QWAuJb2KJTPXEU6D",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Message a model",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "df11db5d-8ae9-4ee6-9477-cc72797f6b58",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4e131d178ac76eeb85cb6e8ecb34dc5d2f169afd9eb1d4b8ef61b1eebb473819"
+  },
+  "id": "myk93onlnoPVZkHv",
+  "tags": []
+}
